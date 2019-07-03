@@ -37,6 +37,7 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 
 /* The cropping style of the crop view */
 @property (nonatomic, assign, readwrite) TOCropViewCroppingStyle croppingStyle;
+@property (nonatomic, strong, readwrite) UIBezierPath *customCropPath;
 
 /* Views */
 @property (nonatomic, strong) TOCropToolbar *toolbar;
@@ -101,6 +102,12 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 - (instancetype)initWithImage:(UIImage *)image
 {
     return [self initWithCroppingStyle:TOCropViewCroppingStyleDefault image:image];
+}
+
+- (instancetype)initWithCustomCroppingPath:(UIBezierPath *)customCroppingPath image:(UIImage *)image {
+    self = [self initWithCroppingStyle:TOCropViewCroppingStyleCircular image:image];
+    self.customCropPath = customCroppingPath;
+    return self;
 }
 
 - (void)viewDidLoad
@@ -905,7 +912,7 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 
     //If desired, when the user taps done, show an activity sheet
     if (self.showActivitySheetOnDone) {
-        TOActivityCroppedImageProvider *imageItem = [[TOActivityCroppedImageProvider alloc] initWithImage:self.image cropFrame:cropFrame angle:angle circular:(self.croppingStyle == TOCropViewCroppingStyleCircular)];
+        TOActivityCroppedImageProvider *imageItem = [[TOActivityCroppedImageProvider alloc] initWithImage:self.image cropFrame:cropFrame angle:angle circular:(self.croppingStyle == TOCropViewCroppingStyleCircular && self.customCropPath == nil)];
         TOCroppedImageAttributes *attributes = [[TOCroppedImageAttributes alloc] initWithCroppedFrame:cropFrame angle:angle originalImageSize:self.image.size];
         
         NSMutableArray *activityItems = [@[imageItem, attributes] mutableCopy];
@@ -971,7 +978,7 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 
     //If cropping circular and the circular generation delegate/block is implemented, call it
     if (self.croppingStyle == TOCropViewCroppingStyleCircular && (isCircularImageDelegateAvailable || isCircularImageCallbackAvailable)) {
-        UIImage *image = [self.image croppedImageWithFrame:cropFrame angle:angle circularClip:YES];
+        UIImage *image = [self.image croppedImageWithFrame:cropFrame angle:angle circularClip:(self.customCropPath == nil)];
         
         //Dispatch on the next run-loop so the animation isn't interuppted by the crop operation
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.03f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -1044,7 +1051,13 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
     // Lazily create the crop view in case we try and access it before presentation, but
     // don't add it until our parent view controller view has loaded at the right time
     if (!_cropView) {
-        _cropView = [[TOCropView alloc] initWithCroppingStyle:self.croppingStyle image:self.image];
+        
+        if (self.customCropPath) {
+            _cropView = [[TOCropView alloc] initWithCustomCroppingPath:self.customCropPath image:self.image];
+        } else {
+            _cropView = [[TOCropView alloc] initWithCroppingStyle:self.croppingStyle image:self.image];
+        }
+        
         _cropView.delegate = self;
         _cropView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [self.view addSubview:_cropView];

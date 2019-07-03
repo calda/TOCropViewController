@@ -14,6 +14,7 @@ class ViewController: UIViewController, CropViewControllerDelegate, UIImagePicke
     
     private var image: UIImage?
     private var croppingStyle = CropViewCroppingStyle.default
+    private var customCropPath: UIBezierPath?
     
     private var croppedRect = CGRect.zero
     private var croppedAngle = 0
@@ -21,7 +22,14 @@ class ViewController: UIViewController, CropViewControllerDelegate, UIImagePicke
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         guard let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage) else { return }
         
-        let cropController = CropViewController(croppingStyle: croppingStyle, image: image)
+        let cropController: CropViewController
+        
+        if let customCropPath = customCropPath {
+            cropController = CropViewController(customCroppingPath: customCropPath, image: image)
+        } else {
+            cropController = CropViewController(croppingStyle: croppingStyle, image: image)
+        }
+        
         cropController.delegate = self
         
         // Uncomment this if you wish to provide extra instructions via a title label
@@ -129,6 +137,7 @@ class ViewController: UIViewController, CropViewControllerDelegate, UIImagePicke
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         let defaultAction = UIAlertAction(title: "Crop Image", style: .default) { (action) in
             self.croppingStyle = .default
+            self.customCropPath = nil
             
             let imagePicker = UIImagePickerController()
             imagePicker.sourceType = .photoLibrary
@@ -139,6 +148,7 @@ class ViewController: UIViewController, CropViewControllerDelegate, UIImagePicke
         
         let profileAction = UIAlertAction(title: "Make Profile Picture", style: .default) { (action) in
             self.croppingStyle = .circular
+            self.customCropPath = UIBezierPath(roundedRect: CGRect(origin: .zero, size: CGSize(width: 5, height: 10)), byRoundingCorners: .allCorners, cornerRadii: CGSize(width: 3, height: 3))
             
             let imagePicker = UIImagePickerController()
             imagePicker.modalPresentationStyle = .popover

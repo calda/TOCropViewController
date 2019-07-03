@@ -31,7 +31,7 @@ public typealias CropViewControllerAspectRatioPreset = TOCropViewControllerAspec
 public typealias CropViewControllerToolbarPosition = TOCropViewControllerToolbarPosition
 
 /**
- The type of cropping style for this view controller (ie a square or a circle cropping region)
+ The type of cropping style for this view controller (ie a square or a some bezier path)
  */
 public typealias CropViewCroppingStyle = TOCropViewCroppingStyle
 
@@ -145,6 +145,13 @@ open class CropViewController: UIViewController, TOCropViewControllerDelegate {
      */
     public var croppingStyle: CropViewCroppingStyle {
         return toCropViewController.croppingStyle
+    }
+    
+    /**
+     The custom cropping path of this particular crop view controller
+     */
+    public var customCropPath: UIBezierPath? {
+        return toCropViewController.customCropPath
     }
     
     /**
@@ -436,6 +443,13 @@ open class CropViewController: UIViewController, TOCropViewControllerDelegate {
      */
     public init(croppingStyle: CropViewCroppingStyle, image: UIImage) {
         self.toCropViewController = TOCropViewController(croppingStyle: croppingStyle, image: image)
+        super.init(nibName: nil, bundle: nil)
+        setUpCropController()
+    }
+    
+    /// Creates a new instance of a crop view controller with the supplied image and custom cropping path
+    public init(customCroppingPath: UIBezierPath, image: UIImage) {
+        self.toCropViewController = TOCropViewController(customCroppingPath: customCroppingPath, image: image)
         super.init(nibName: nil, bundle: nil)
         setUpCropController()
     }

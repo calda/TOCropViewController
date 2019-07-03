@@ -52,6 +52,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
 
 @property (nonatomic, strong, readwrite) UIImage *image;
 @property (nonatomic, assign, readwrite) TOCropViewCroppingStyle croppingStyle;
+@property (nullable, nonatomic, strong, readwrite) UIBezierPath *customCroppingPath;
 
 /* Views */
 @property (nonatomic, strong) UIImageView *backgroundImageView;     /* The main image view, placed within the scroll view */
@@ -132,6 +133,17 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     return self;
 }
 
+- (instancetype)initWithCustomCroppingPath:(UIBezierPath *)customCroppingPath image:(UIImage *)image {
+    if (self = [super init]) {
+        _image = image;
+        _croppingStyle = TOCropViewCroppingStyleCircular;
+        _customCroppingPath = customCroppingPath;
+        [self setup];
+    }
+    
+    return self;
+}
+
 - (void)setup
 {
     __weak typeof(self) weakSelf = self;
@@ -145,7 +157,17 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     self.applyInitialCroppedImageFrame = NO;
     self.editing = NO;
     self.cropBoxResizeEnabled = !circularMode;
-    self.aspectRatio = circularMode ? (CGSize){1.0f, 1.0f} : CGSizeZero;
+    
+    if (circularMode) {
+        if (self.customCroppingPath) {
+            self.aspectRatio = self.customCroppingPath.bounds.size;
+        } else {
+            self.aspectRatio = (CGSize){1.0f, 1.0f};
+        }
+    } else {
+        self.aspectRatio = CGSizeZero;
+    }
+    
     self.resetAspectRatioEnabled = !circularMode;
     self.restoreImageCropFrame = CGRectZero;
     self.restoreAngle = 0;
@@ -187,7 +209,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     //Grey transparent overlay view
     self.overlayView = [[UIView alloc] initWithFrame:self.bounds];
     self.overlayView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.overlayView.backgroundColor = [self.backgroundColor colorWithAlphaComponent:0.35f];
+    self.overlayView.backgroundColor = [self.backgroundColor colorWithAlphaComponent:0.65f];
     self.overlayView.hidden = NO;
     self.overlayView.userInteractionEnabled = NO;
     [self addSubview:self.overlayView];
@@ -227,9 +249,35 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     
     // The following setup isn't needed during circular cropping
     if (circularMode) {
-        UIBezierPath *circlePath = [UIBezierPath bezierPathWithOvalInRect:(CGRect){0,0,kTOCropViewCircularPathRadius, kTOCropViewCircularPathRadius}];
+        
+        UIBezierPath *cropPath;
+        
+        if (self.customCroppingPath) {
+            // transform the cropping path to an appropriate size
+            CGAffineTransform scaleTransform;
+            
+            // width is larger, scale it so the width is equal to the expected circular diameter
+            if (self.customCroppingPath.bounds.size.width > self.customCroppingPath.bounds.size.height) {
+                CGFloat scaleRatio = (kTOCropViewCircularPathRadius*2) / self.customCroppingPath.bounds.size.width;
+                scaleTransform = CGAffineTransformMakeScale(scaleRatio, scaleRatio);
+            }
+            // otherwise, scale it so the height is equal to the expected circular diameter
+            else {
+                CGFloat scaleRatio = (kTOCropViewCircularPathRadius*2) / self.customCroppingPath.bounds.size.height;
+                scaleTransform = CGAffineTransformMakeScale(scaleRatio, scaleRatio);
+            }
+            
+            cropPath = ((UIBezierPath *)self.customCroppingPath.copy);
+            [cropPath applyTransform:scaleTransform];
+        }
+        
+        else {
+            cropPath = [UIBezierPath bezierPathWithOvalInRect:(CGRect){0,0,kTOCropViewCircularPathRadius, kTOCropViewCircularPathRadius}];;
+        }
+        
+        
         self.circularMaskLayer = [[CAShapeLayer alloc] init];
-        self.circularMaskLayer.path = circlePath.CGPath;
+        self.circularMaskLayer.path = cropPath.CGPath;
         self.foregroundContainerView.layer.mask = self.circularMaskLayer;
         
         return;

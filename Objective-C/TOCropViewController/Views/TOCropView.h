@@ -48,6 +48,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) TOCropViewCroppingStyle croppingStyle;
 
 /**
+ A custom bezier path to be used as a part of ("hack on top of") the circular cropping style
+ */
+@property (nullable, nonatomic, strong, readonly) UIBezierPath *customCroppingPath;
+
+/**
  A grid view overlaid on top of the foreground image view's container.
  */
 @property (nonnull, nonatomic, strong, readonly) TOCropOverlayView *gridOverlayView;
@@ -206,6 +211,11 @@ The minimum croping aspect ratio. If set, user is prevented from setting croppin
  Create a new instance of the crop view with the specified image and cropping
  */
 - (nonnull instancetype)initWithCroppingStyle:(TOCropViewCroppingStyle)style image:(nonnull UIImage *)image;
+
+/**
+ Create a new instance of the crop view with the specified image and a custom cropping path
+ */
+- (nonnull instancetype)initWithCustomCroppingPath:(UIBezierPath *)customCroppingPath image:(nonnull UIImage *)image;
 
 /**
  Performs the initial set up, including laying out the image and applying any restore properties.

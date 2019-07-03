@@ -112,6 +112,11 @@
  */
 @property (nonnull, nonatomic, strong, readonly) TOCropView *cropView;
 
+/**
+ A custom bezier path to use as the cropping mask
+ */
+@property (nullable, nonatomic, strong, readonly) UIBezierPath *customCropPath;
+
 /** 
  In the coordinate space of the image itself, the region that is currently
  being highlighted by the crop box.
@@ -327,10 +332,15 @@
 /** 
  Creates a new instance of a crop view controller with the supplied image and cropping style
  
- @param style The cropping style that will be used with this view controller (eg, rectangular, or circular)
+ @param style The cropping style that will be used with this view controller (eg, rectangular, circular, or some custom path)
  @param image The image that will be cropped
  */
 - (nonnull instancetype)initWithCroppingStyle:(TOCropViewCroppingStyle)style image:(nonnull UIImage *)image NS_SWIFT_NAME(init(croppingStyle:image:));
+
+/**
+ Create a new instance of the View Controller with the specified image and a custom cropping path
+ */
+- (nonnull instancetype)initWithCustomCroppingPath:(UIBezierPath *)customCroppingPath image:(nonnull UIImage *)image;
 
 /**
  Resets object of TOCropViewController class as if user pressed reset button in the bottom bar themself
