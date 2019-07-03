@@ -6,6 +6,10 @@
 
 This fork hacks on a `customCroppingPath` option that piggybacks on the `CropViewCroppingStyle.circular` infrastructure. The consumer can specify a `customCroppingPath` `UIBezierPath` that replaces the circular bezier path used on the `TOCropView`'s `circularMaskLayer`.
 
+<p align="center">
+<img src="/Images/california example.png" width="300px" align="middle"/> <img src="/Images/tennessee example.png" width="500px" align="middle"/>
+</p>
+
 ---
 
 <p align="center">
