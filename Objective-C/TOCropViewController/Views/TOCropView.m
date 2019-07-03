@@ -258,12 +258,12 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
             
             // width is larger, scale it so the width is equal to the expected circular diameter
             if (self.customCroppingPath.bounds.size.width > self.customCroppingPath.bounds.size.height) {
-                CGFloat scaleRatio = (kTOCropViewCircularPathRadius*2) / self.customCroppingPath.bounds.size.width;
+                CGFloat scaleRatio = kTOCropViewCircularPathRadius / self.customCroppingPath.bounds.size.width;
                 scaleTransform = CGAffineTransformMakeScale(scaleRatio, scaleRatio);
             }
             // otherwise, scale it so the height is equal to the expected circular diameter
             else {
-                CGFloat scaleRatio = (kTOCropViewCircularPathRadius*2) / self.customCroppingPath.bounds.size.height;
+                CGFloat scaleRatio = kTOCropViewCircularPathRadius / self.customCroppingPath.bounds.size.height;
                 scaleTransform = CGAffineTransformMakeScale(scaleRatio, scaleRatio);
             }
             
@@ -274,7 +274,6 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
         else {
             cropPath = [UIBezierPath bezierPathWithOvalInRect:(CGRect){0,0,kTOCropViewCircularPathRadius, kTOCropViewCircularPathRadius}];;
         }
-        
         
         self.circularMaskLayer = [[CAShapeLayer alloc] init];
         self.circularMaskLayer.path = cropPath.CGPath;
@@ -1064,7 +1063,13 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     
     // If the mask layer is present, adjust its transform to fit the new container view size
     if (self.circularMaskLayer) {
-        CGFloat scale = _cropBoxFrame.size.width / kTOCropViewCircularPathRadius;
+        CGFloat scale;
+        if (_cropBoxFrame.size.width > _cropBoxFrame.size.height) {
+            scale = _cropBoxFrame.size.width / kTOCropViewCircularPathRadius;
+        } else {
+            scale = _cropBoxFrame.size.height / kTOCropViewCircularPathRadius;
+        }
+        
         self.circularMaskLayer.transform = CATransform3DScale(CATransform3DIdentity, scale, scale, 1.0f);
     }
     

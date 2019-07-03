@@ -340,7 +340,7 @@
 /**
  Create a new instance of the View Controller with the specified image and a custom cropping path
  */
-- (nonnull instancetype)initWithCustomCroppingPath:(UIBezierPath *)customCroppingPath image:(nonnull UIImage *)image;
+- (nonnull instancetype)initWithCustomCroppingPath:(nonnull UIBezierPath *)customCroppingPath image:(nonnull UIImage *)image;
 
 /**
  Resets object of TOCropViewController class as if user pressed reset button in the bottom bar themself
