@@ -1,5 +1,13 @@
 # TOCropViewController
 
+---
+
+### 🔀 `calda/TOCropViewController` fork notes
+
+This fork hacks on a `customCroppingPath` option that piggybacks on the `CropViewCroppingStyle.circular` infrastructure. The consumer can specify a `customCroppingPath` `UIBezierPath` that replaces the circular bezier path used on the `TOCropView`'s `circularMaskLayer`.
+
+---
+
 <p align="center">
 <img src="https://github.com/TimOliver/TOCropViewController/raw/master/Images/screenshot.jpg" width="900" style="margin:0 auto" />
 </p>
